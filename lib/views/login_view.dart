@@ -1,5 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutternotes/constants/routes.dart';
+import 'package:flutternotes/services/auth/auth_exceptions.dart';
+import 'package:flutternotes/services/auth/auth_service.dart';
+
+import '../utilities/error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -32,18 +36,22 @@ class _LoginViewState extends State<LoginView> {
     final password = _passwordController.text;
 
     try {
-      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await AuthService.firebase().login(
           email: email,
           password: password
       );
-      print('User Credential: $userCredential');
-      Navigator.pushNamedAndRemoveUntil(context, '/notes', (route) => false);
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        print('User not found.');
-      } else if (e.code == 'wrong-password') {
-        print('Wrong password');
+      final user = AuthService.firebase().currentUser;
+      if (user?.isEmailVerified ?? false) {
+        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.notes, (route) => false);
+      } else {
+        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.verify, (route) => false);
       }
+    } on UserNotFoundAuthException {
+      await showErrorDialog(context, 'User not found.');
+    } on WrongPasswordAuthException {
+      await showErrorDialog(context, 'Wrong credentials.');
+    } on GenericAuthException {
+      await showErrorDialog(context, 'Authentication Error.');
     }
 
   }
@@ -79,7 +87,7 @@ class _LoginViewState extends State<LoginView> {
             child: const Text('Login'),
           ),
           TextButton(
-            onPressed: () => {Navigator.pushNamedAndRemoveUntil(context, '/register', (route) => false)},
+            onPressed: () => {Navigator.pushNamedAndRemoveUntil(context, AppRoutes.register, (route) => false)},
             child: const Text('Not registered yet? Register here.'),
           ),
         ],

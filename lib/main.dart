@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutternotes/firebase_options.dart';
+import 'package:flutternotes/constants/routes.dart';
+import 'package:flutternotes/services/auth/auth_service.dart';
 import 'package:flutternotes/views/notes_view.dart';
 import 'package:flutternotes/views/register_view.dart';
 import 'package:flutternotes/views/verify_email_view.dart';
@@ -11,9 +10,7 @@ import 'views/login_view.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform
-  );
+  await AuthService.firebase().initialize();
 
   runApp(
       MaterialApp(
@@ -23,10 +20,10 @@ void main() async {
           colorSchemeSeed: Colors.green,
         ),
         routes: {
-          '/login': (context) => const LoginView(),
-          '/register': (context) => const RegisterView(),
-          '/verify': (context) => const VerifyEmailView(),
-          '/notes': (context) => const NotesView(),
+          AppRoutes.login: (context) => const LoginView(),
+          AppRoutes.register: (context) => const RegisterView(),
+          AppRoutes.verify: (context) => const VerifyEmailView(),
+          AppRoutes.notes: (context) => const NotesView(),
         },
         home: const HomePage(),
       )
@@ -46,8 +43,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    user = FirebaseAuth.instance.currentUser;
-    user?.reload();
+    user = AuthService.firebase().currentUser;
     super.initState();
   }
 
