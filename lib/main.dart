@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutternotes/constants/routes.dart';
 import 'package:flutternotes/services/auth/auth_service.dart';
-import 'package:flutternotes/views/notes/new_note_view.dart';
+import 'package:flutternotes/views/notes/edit_note_view.dart';
 import 'package:flutternotes/views/notes/notes_view.dart';
 import 'package:flutternotes/views/register_view.dart';
 import 'package:flutternotes/views/verify_email_view.dart';
@@ -25,7 +25,7 @@ void main() async {
           AppRoutes.register: (context) => const RegisterView(),
           AppRoutes.verify: (context) => const VerifyEmailView(),
           AppRoutes.notes: (context) => const NotesView(),
-          AppRoutes.newNote: (context) => const NewNoteView(),
+          AppRoutes.editNote: (context) => const EditNoteView(),
         },
         home: const HomePage(),
       )

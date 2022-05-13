@@ -1,28 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutternotes/services/auth/auth_service.dart';
 import 'package:flutternotes/services/crud/notes_service.dart';
+import 'package:flutternotes/utilities/generics/get_arguments.dart';
 
-class NewNoteView extends StatefulWidget {
-  const NewNoteView({Key? key}) : super(key: key);
+class EditNoteView extends StatefulWidget {
+  const EditNoteView({Key? key}) : super(key: key);
 
   @override
-  State<NewNoteView> createState() => _NewNoteViewState();
+  State<EditNoteView> createState() => _EditNoteViewState();
 }
 
-class _NewNoteViewState extends State<NewNoteView> {
+class _EditNoteViewState extends State<EditNoteView> {
 
   DatabaseNote? _note;
   late final NotesService _notesService;
   late final TextEditingController _textController;
   
-  Future<DatabaseNote> createNewNote() async {
+  Future<DatabaseNote> createOrGetNote(BuildContext context) async {
+    final widgetNote = context.getArgument<DatabaseNote>();
+    if (widgetNote != null) {
+      _note = widgetNote;
+      _textController.text = widgetNote.text;
+      return widgetNote;
+    }
+
     final existingNote = _note;
     if (existingNote != null) {
       return existingNote;
     }
     final currentUser = AuthService.firebase().currentUser!;
     final owner = await _notesService.getUser(email: currentUser.email!);
-    return await _notesService.createNote(owner: owner);
+    final newNote = await _notesService.createNote(owner: owner);
+    _note = newNote;
+    return newNote;
   }
 
   void _deleteNoteIfEmpty() {
@@ -76,11 +86,10 @@ class _NewNoteViewState extends State<NewNoteView> {
         ],
       ),
       body: FutureBuilder(
-        future: createNewNote(),
+        future: createOrGetNote(context),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
-              _note = snapshot.data as DatabaseNote;
               _textController.addListener(_textControllerListener);
               return TextField(
                 controller: _textController,
