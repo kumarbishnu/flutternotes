@@ -12,10 +12,16 @@ class NotesService {
   List<DatabaseNote> _notes = [];
 
   static final NotesService _shared = NotesService._sharedInstance();
-  NotesService._sharedInstance();
+  NotesService._sharedInstance() {
+    _notesStreamController = StreamController<List<DatabaseNote>>.broadcast(
+      onListen: () {
+        _notesStreamController.sink.add(_notes);
+      }
+    );
+  }
   factory NotesService() => _shared;
 
-  final _notesStreamController = StreamController<List<DatabaseNote>>.broadcast();
+  late final StreamController<List<DatabaseNote>> _notesStreamController;
 
   Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
 
@@ -39,10 +45,15 @@ class NotesService {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     await getNote(id: note.id);
-    final updatesCount = await db.update(noteTable, {
-      textColumn: text,
-      syncColumn: 0
-    });
+    final updatesCount = await db.update(
+      noteTable,
+      {
+        textColumn: text,
+        syncColumn: 0
+      },
+      where: '$idColumn = ?',
+      whereArgs: [note.id]
+    );
     if (updatesCount != 1) throw CouldNotUpdateNote();
 
     final updatedNote = await getNote(id: note.id);
