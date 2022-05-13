@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutternotes/constants/routes.dart';
 import 'package:flutternotes/services/auth/auth_service.dart';
-import 'package:flutternotes/views/notes_view.dart';
+import 'package:flutternotes/views/notes/new_note_view.dart';
+import 'package:flutternotes/views/notes/notes_view.dart';
 import 'package:flutternotes/views/register_view.dart';
 import 'package:flutternotes/views/verify_email_view.dart';
 
@@ -24,6 +25,7 @@ void main() async {
           AppRoutes.register: (context) => const RegisterView(),
           AppRoutes.verify: (context) => const VerifyEmailView(),
           AppRoutes.notes: (context) => const NotesView(),
+          AppRoutes.newNote: (context) => const NewNoteView(),
         },
         home: const HomePage(),
       )
@@ -52,7 +54,7 @@ class _HomePageState extends State<HomePage> {
 
     if (user == null) {
       return const LoginView();
-    } else if (!user.emailVerified) {
+    } else if (!user.isEmailVerified) {
       return const VerifyEmailView();
     }
 
