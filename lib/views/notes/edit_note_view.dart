@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutternotes/services/auth/auth_service.dart';
 import 'package:flutternotes/services/cloud/cloud_note.dart';
 import 'package:flutternotes/services/cloud/firebase_cloud_storage.dart';
+import 'package:flutternotes/utilities/dialogs/cannot_share_dialog.dart';
 import 'package:flutternotes/utilities/generics/get_arguments.dart';
+import 'package:share_plus/share_plus.dart';
 
 class EditNoteView extends StatefulWidget {
   const EditNoteView({Key? key}) : super(key: key);
@@ -80,8 +82,12 @@ class _EditNoteViewState extends State<EditNoteView> {
         title: const Text('Add New Note'),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.delete_rounded),
+            onPressed: () async {
+              final text = _textController.text;
+              if (_note == null || text.isEmpty) {await showCannotShareDialog(context);}
+              Share.share(text);
+            },
+            icon: const Icon(Icons.share_rounded),
           )
         ],
       ),
