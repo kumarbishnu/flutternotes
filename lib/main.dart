@@ -6,6 +6,7 @@ import 'package:flutternotes/services/auth/bloc/auth_bloc.dart';
 import 'package:flutternotes/services/auth/bloc/auth_event.dart';
 import 'package:flutternotes/services/auth/bloc/auth_state.dart';
 import 'package:flutternotes/services/auth/firebase_auth_provider.dart';
+import 'package:flutternotes/views/forgot_password_view.dart';
 import 'package:flutternotes/views/notes/edit_note_view.dart';
 import 'package:flutternotes/views/notes/notes_view.dart';
 import 'package:flutternotes/views/register_view.dart';
@@ -61,6 +62,8 @@ class HomePage extends StatelessWidget {
             return const LoginView();
           case AuthStateRegistering:
             return const RegisterView();
+          case AuthStateForgotPassword:
+            return const ForgotPasswordView();
           default:
             return const Scaffold(
               body: CircularProgressIndicator(),
