@@ -4,12 +4,13 @@ import 'package:flutternotes/services/auth/bloc/auth_event.dart';
 import 'package:flutternotes/services/auth/bloc/auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc(AuthProvider provider) : super(const AuthStateLoading()) {
+  AuthBloc(AuthProvider provider) : super(const AuthStateUninitialized()) {
+
     on<AuthEventInitialize>((event, emit) async {
       await provider.initialize();
       final user = provider.currentUser;
       if (user == null) {
-        emit(const AuthStateLoggedOut());
+        emit(const AuthStateLoggedOut(exception: null, isLoading: false));
       } else if (!user.isEmailVerified) {
         emit(const AuthStateNeedsVerification());
       } else {
@@ -17,25 +18,49 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     });
 
+    on<AuthEventShouldRegister>((event, emit) {
+      emit(const AuthStateRegistering(null));
+    });
+
+    on<AuthEventRegister>((event, emit) async {
+      try {
+        await provider.register(email: event.email, password: event.password);
+        await provider.sendVerificationEmail();
+        emit(const AuthStateNeedsVerification());
+      } on Exception catch (e) {
+        emit(AuthStateRegistering(e));
+      }
+    });
+
+    on<AuthEventSendEmailVerification>((event, emit) async {
+      await provider.sendVerificationEmail();
+      emit(state);
+    });
+
     on<AuthEventLogin>((event, emit) async {
-      emit(const AuthStateLoading());
+      emit(const AuthStateLoggedOut(exception: null, isLoading: true));
       try {
         final user =
             await provider.login(email: event.email, password: event.password);
-        emit(AuthStateLoggedIn(user));
+        emit(const AuthStateLoggedOut(exception: null, isLoading: false));
+        if (!user.isEmailVerified) {
+          emit(const AuthStateNeedsVerification());
+        } else {
+          emit(AuthStateLoggedIn(user));
+        }
       } on Exception catch (e) {
-        emit(AuthStateLoginFailure(e));
+        emit(AuthStateLoggedOut(exception: e, isLoading: false));
       }
     });
 
     on<AuthEventLogout>((event, emit) async {
-      emit(const AuthStateLoading());
       try {
         await provider.logout();
-        emit(const AuthStateLoggedOut());
+        emit(const AuthStateLoggedOut(exception: null, isLoading: false));
       } on Exception catch (e) {
-        emit(AuthStateLogoutFailure(e));
+        emit(AuthStateLoggedOut(exception: e, isLoading: false));
       }
     });
+
   }
 }

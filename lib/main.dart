@@ -23,10 +23,6 @@ void main() async {
           colorSchemeSeed: Colors.green,
         ),
         routes: {
-          AppRoutes.login: (context) => const LoginView(),
-          AppRoutes.register: (context) => const RegisterView(),
-          AppRoutes.verify: (context) => const VerifyEmailView(),
-          AppRoutes.notes: (context) => const NotesView(),
           AppRoutes.editNote: (context) => const EditNoteView(),
         },
         home: BlocProvider<AuthBloc>(
@@ -52,6 +48,8 @@ class HomePage extends StatelessWidget {
             return const VerifyEmailView();
           case AuthStateLoggedOut:
             return const LoginView();
+          case AuthStateRegistering:
+            return const RegisterView();
           default:
             return const Scaffold(
               body: CircularProgressIndicator(),
